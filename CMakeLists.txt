@@ -1,19 +1,24 @@
 cmake_minimum_required(VERSION 3.10)
-project(ai-search-engine)
+project(ai-search-engine LANGUAGES CXX)
 
-# 告诉 CMake 导出编译命令信息给编辑器看
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+option(BUILD_OFFLINE_WORD "Build offline word module" ON)
+option(BUILD_OFFLINE_PAGE "Build offline page module" OFF)
+option(BUILD_ONLINE "Build online module" OFF)
 
-# 查找 src 下的所有源文件
-file(GLOB_RECURSE SOURCES "src/*.cpp")
+if(BUILD_OFFLINE_WORD AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/offline/word/CMakeLists.txt")
+    add_subdirectory(offline/word)
+endif()
 
-# 生成可执行文件到 bin 目录
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
-add_executable(engine ${SOURCES})
+if(BUILD_OFFLINE_PAGE AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/offline/page/CMakeLists.txt")
+    add_subdirectory(offline/page)
+endif()
 
-# 核心步骤：添加头文件搜索路径
-target_include_directories(engine PRIVATE ${PROJECT_SOURCE_DIR}/include)
-message(STATUS "====== 当前项目的真实根目录是: ${PROJECT_SOURCE_DIR} ======")
+if(BUILD_ONLINE AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/online/CMakeLists.txt")
+    add_subdirectory(online)
+endif()
+

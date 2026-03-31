@@ -20,7 +20,7 @@ DictProducer::DictProducer()
     _enFiles.push_back("english.txt");
     _enFiles.push_back("The_Holy_Bible.txt");
 
-    string dirname = "../data/CN/art/";
+    string dirname = "../data/raw/CN/art/";
     DIR* dir;
     struct dirent* direntptr;
     dir = opendir(dirname.c_str());
@@ -127,7 +127,7 @@ bool DictProducer::isStopWord(const string &word)
 
 void DictProducer::saveStopWords(const string &fileName)
 {
-    ifstream ifs("../data/" + fileName);
+    ifstream ifs("../data/raw/" + fileName);
     if (!ifs.is_open())
     {
         cerr << "Open file: " << fileName << " failed!" << endl;
@@ -183,7 +183,7 @@ void DictProducer::processCnLine(string &line)
 
 void DictProducer::openEnFile(ifstream &ifs, const string &fileName)
 {
-    ifs.open("../data/EN/" + fileName);
+    ifs.open("../data/raw/EN/" + fileName);
     if (!ifs.is_open())
     {
         cerr << "Open file: " << fileName << " failed!" << endl;
@@ -203,7 +203,7 @@ void DictProducer::openEnFile(ifstream &ifs, const string &fileName)
 
 void DictProducer::openCnFile(ifstream &ifs, const string &fileName)
 {
-    ifs.open("../data/CN/art/" + fileName);
+    ifs.open("../data/raw/CN/art/" + fileName);
     if (!ifs.is_open())
     {
         cerr << "Open file: " << fileName << " failed!" << endl;
@@ -223,7 +223,7 @@ void DictProducer::openCnFile(ifstream &ifs, const string &fileName)
 
 void DictProducer::inputFile(ofstream &ofs, const string &fileName)
 {
-    ofs.open("../data/" + fileName);
+    ofs.open("../data/output/" + fileName);
     if (!ofs.is_open())
     {
         cerr << "Open file: " << fileName << " failed." << endl;
