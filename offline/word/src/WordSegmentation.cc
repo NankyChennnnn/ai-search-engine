@@ -1,7 +1,21 @@
 #include "WordSegmentation.h"
 
+JiebaConfig _jiebaConf(JIEBA_CONF_PATH);
+
 WordSegmentation::WordSegmentation()
-: _jieba(DICT_PATH, HMM_PATH, USER_DICT_PATH, IDF_PATH, STOP_WORD_PATH)
+: _jieba(_jiebaConf.get("jieba", "dict").c_str(),       // 最大概率法
+                                                        // (MPSegment: Max Probability)
+                                                        // 分词所使用的词典路径
+         
+         _jiebaConf.get("jieba", "hmm").c_str(),        // 隐式马尔科夫模型
+                                                        // (HMMSegment: Hidden Markov Model)
+                                                        // 分词所使用的词典路径
+         
+         _jiebaConf.get("jieba", "user").c_str(),       // 用户自定义词典路径
+         
+         _jiebaConf.get("jieba", "idf").c_str(),        // IDF路径
+         
+         _jiebaConf.get("jieba", "stop_word").c_str())  // 停用词路径
 {
     cout << "jieba init" << endl;
 }

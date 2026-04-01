@@ -12,7 +12,6 @@ endif()
 get_filename_component(REPO_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE)
 set(THIRD_PARTY_DIR "${REPO_ROOT}/third_party")
 set(CPPJIEBA_DIR "${THIRD_PARTY_DIR}/cppjieba")
-set(CPPJIEBA_DICT_DIR "${CPPJIEBA_DIR}/dict")
 
 if(NOT EXISTS "${CPPJIEBA_DIR}/Jieba.hpp")
     message(FATAL_ERROR "cppjieba not found: ${CPPJIEBA_DIR}")
@@ -34,12 +33,8 @@ target_include_directories(word_producer PRIVATE
 )
 
 target_compile_definitions(word_producer PRIVATE
-    DEFAULT_CONF_PATH="${CMAKE_CURRENT_SOURCE_DIR}/conf/word.conf"
-    CPPJIEBA_DICT_PATH="${CPPJIEBA_DICT_DIR}/jieba.dict.utf8"
-    CPPJIEBA_HMM_PATH="${CPPJIEBA_DICT_DIR}/hmm_model.utf8"
-    CPPJIEBA_USER_DICT_PATH="${CPPJIEBA_DICT_DIR}/user.dict.utf8"
-    CPPJIEBA_IDF_PATH="${CPPJIEBA_DICT_DIR}/idf.utf8"
-    CPPJIEBA_STOP_WORD_PATH="${CPPJIEBA_DICT_DIR}/stop_words.utf8"
+    WORD_CONF_PATH="${CMAKE_CURRENT_SOURCE_DIR}/conf/word.conf"
+    JIEBA_CONF_PATH="${CMAKE_CURRENT_SOURCE_DIR}/conf/jieba.conf"
 )
 
 message(STATUS "word source dir: ${CMAKE_CURRENT_SOURCE_DIR}")

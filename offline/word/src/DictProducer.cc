@@ -12,15 +12,16 @@ using std::endl;
 using std::cerr;
 using std::istringstream;
 
-DictProducer::DictProducer()
+DictProducer::DictProducer(WordConfig wordConf)
 : _idCounter(0)
+, _wordConf(wordConf)
 {
-    saveStopWords("stop_words_eng.txt");
-    saveStopWords("stop_words_zh.txt");
-    _enFiles.push_back("english.txt");
-    _enFiles.push_back("The_Holy_Bible.txt");
+    saveStopWords(_wordConf.get("data", "stop_words_eng"));
+    saveStopWords(_wordConf.get("data", "stop_words_zh"));
+    _enFiles.push_back(_wordConf.get("data", "english"));
+    _enFiles.push_back(_wordConf.get("data", "bible"));
 
-    string dirname = "../data/raw/CN/art/";
+    string dirname = _wordConf.getPath("data", "chinese_dir");
     DIR* dir;
     struct dirent* direntptr;
     dir = opendir(dirname.c_str());
@@ -36,7 +37,7 @@ DictProducer::DictProducer()
         if (strncmp(direntptr->d_name, ".", 1) != 0 &&
             strncmp(direntptr->d_name, "..", 2) != 0)
         {
-            _cnFiles.push_back(direntptr->d_name);
+            _cnFiles.push_back(dirname + direntptr->d_name);
         }
     }
 }
@@ -100,16 +101,16 @@ void DictProducer::createCnIndex()
 void DictProducer::store()
 {
     ofstream ofs1;
-    inputFile(ofs1, "en_dict.dat");
+    inputFile(ofs1, _wordConf.get("output", "en_dict"));
 
     ofstream ofs2;
-    inputFile(ofs2, "en_index.dat");
+    inputFile(ofs2, _wordConf.get("output", "en_index"));
 
     ofstream ofs3;
-    inputFile(ofs3, "cn_dict.dat");
+    inputFile(ofs3, _wordConf.get("output", "cn_dict"));
 
     ofstream ofs4;
-    inputFile(ofs4, "cn_index.dat");
+    inputFile(ofs4, _wordConf.get("output", "cn_index"));
 }
 
 bool DictProducer::isStopWord(const string &word)
@@ -127,14 +128,16 @@ bool DictProducer::isStopWord(const string &word)
 
 void DictProducer::saveStopWords(const string &fileName)
 {
-    ifstream ifs("../data/raw/" + fileName);
+    ifstream ifs(fileName);
+    size_t pos = fileName.find_last_of('/');
+    string name = fileName.substr(pos + 1);
     if (!ifs.is_open())
     {
-        cerr << "Open file: " << fileName << " failed!" << endl;
+        cerr << "Open file: " << name << " failed!" << endl;
         return;
     }
 
-    cout << "Open file: " << fileName << " successfully." << endl;
+    cout << "Open file: " << name << " successfully." << endl;
     cout << "Reading..." << endl;
 
     // 默认停用词库文件单行一个单词
@@ -174,7 +177,7 @@ void DictProducer::processEnLine(string &line)
 
 void DictProducer::processCnLine(string &line)
 {
-    vector<string> results = wordSeg(line);
+    vector<string> results = _wordSeg(line);
     for (auto it = results.begin(); it != results.end(); ++it)
     {
         insertToCnMap(*it);
@@ -183,13 +186,15 @@ void DictProducer::processCnLine(string &line)
 
 void DictProducer::openEnFile(ifstream &ifs, const string &fileName)
 {
-    ifs.open("../data/raw/EN/" + fileName);
+    ifs.open(fileName);
+    size_t pos = fileName.find_last_of('/');
+    string name = fileName.substr(pos + 1);
     if (!ifs.is_open())
     {
-        cerr << "Open file: " << fileName << " failed!" << endl;
+        cerr << "Open file: " << name << " failed!" << endl;
         return;
     }
-    cout << "Open file: " << fileName << " successfully." << endl;
+    cout << "Open file: " << name << " successfully." << endl;
     cout << "Reading..." << endl;
 
     string line;
@@ -203,13 +208,15 @@ void DictProducer::openEnFile(ifstream &ifs, const string &fileName)
 
 void DictProducer::openCnFile(ifstream &ifs, const string &fileName)
 {
-    ifs.open("../data/raw/CN/art/" + fileName);
+    ifs.open(fileName);
+    size_t pos = fileName.find_last_of('/');
+    string name = fileName.substr(pos + 1);
     if (!ifs.is_open())
     {
-        cerr << "Open file: " << fileName << " failed!" << endl;
+        cerr << "Open file: " << name << " failed!" << endl;
         return;
     }
-    cout << "Open file: " << fileName << " successfully." << endl;
+    cout << "Open file: " << name << " successfully." << endl;
     cout << "Reading..." << endl;
 
     string line;
@@ -223,7 +230,8 @@ void DictProducer::openCnFile(ifstream &ifs, const string &fileName)
 
 void DictProducer::inputFile(ofstream &ofs, const string &fileName)
 {
-    ofs.open("../data/output/" + fileName);
+    string output_dir = _wordConf.getPath("output", "output_dir");
+    ofs.open(output_dir + fileName);
     if (!ofs.is_open())
     {
         cerr << "Open file: " << fileName << " failed." << endl;

@@ -1,6 +1,7 @@
 #ifndef __DICTPRODUCER_H__
 #define __DICTPRODUCER_H__
 
+#include "WordConfig.h"
 #include "WordSegmentation.h"
 #include <fstream>
 #include <vector>
@@ -18,7 +19,7 @@ using std::ofstream;
 class DictProducer
 {
 public:
-    DictProducer();
+    DictProducer(WordConfig wordConf);
     ~DictProducer();
     
     // 创建词典
@@ -65,7 +66,8 @@ private:
     // 停用词集合
     unordered_set<string> _stopWords;
 
-    WordSegmentation wordSeg;
+    WordSegmentation _wordSeg;
+    WordConfig _wordConf;
 };
 
 #endif
