@@ -39,20 +39,17 @@ WordConfig::WordConfig(const string &configPath)
 
             size_t last_pos = value.find_first_not_of("../");
             string dir = _configDir;
-            if (section == "output" && key != "output_dir")
+            
+            size_t n = 0;
+            while (n < last_pos)
             {
-                dir = _data[section]["output_dir"];
-                value = dir + value.substr(last_pos);
+                size_t conf_pos = dir.find_last_of('/');
+                dir = dir.substr(0, conf_pos);
+                n += 3;
             }
-            else
+
+            if (last_pos != 0)
             {
-                size_t n = 0;
-                while (n != last_pos)
-                {
-                    size_t conf_pos = dir.find_last_of('/');
-                    dir = dir.substr(0, conf_pos);
-                    n += 3;
-                }
                 value = dir + "/" + value.substr(last_pos);
             }
 
@@ -76,7 +73,16 @@ string WordConfig::get(const string &section, const string &key) const
                 return "Error";
             }
 
-            value = data->second;
+            if (section == "output" && key != "output_dir")
+            {
+                auto dir = it->second.find("output_dir");
+                value = dir->second + data->second;
+            }
+            else
+            {
+                value = data->second;
+            }
+
             cout << "Info: Find [" << section << "][" << key << "]" << endl;
         }
     }
