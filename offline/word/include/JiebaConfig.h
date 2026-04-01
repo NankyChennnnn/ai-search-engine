@@ -15,6 +15,7 @@ public:
 
 private:
     string _configPath; // config file path
+    string _configDir;  // config files dir
     unordered_map<string, unordered_map<string, string>> _data;
 };
 

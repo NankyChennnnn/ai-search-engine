@@ -230,24 +230,25 @@ void DictProducer::openCnFile(ifstream &ifs, const string &fileName)
 
 void DictProducer::inputFile(ofstream &ofs, const string &fileName)
 {
-    string output_dir = _wordConf.getPath("output", "output_dir");
-    ofs.open(output_dir + fileName);
+    ofs.open(fileName);
+    size_t pos = fileName.find_last_of('/');
+    string name = fileName.substr(pos + 1);
     if (!ofs.is_open())
     {
-        cerr << "Open file: " << fileName << " failed." << endl;
+        cerr << "Open file: " << name << " failed." << endl;
         return;
     }
-    cout << "Open file: " << fileName << " successfully." << endl;
+    cout << "Open file: " << name << " successfully." << endl;
     cout << "Writing..." << endl;
 
-    if (fileName == "en_dict.dat")
+    if (name == "en_dict.dat")
     {
         for (auto it = _enDict.begin(); it != _enDict.end(); ++it)
         {
             ofs << it->first << "    " << it->second << endl;
         }
     }
-    else if (fileName == "en_index.dat")
+    else if (name == "en_index.dat")
     {
         for (auto &it : _index)
         {
@@ -268,7 +269,7 @@ void DictProducer::inputFile(ofstream &ofs, const string &fileName)
             ofs << " }" << endl;
         }
     }
-    else if (fileName == "cn_dict.dat")
+    else if (name == "cn_dict.dat")
     {
         for (auto it = _cnDict.begin(); it != _cnDict.end(); ++it)
         {

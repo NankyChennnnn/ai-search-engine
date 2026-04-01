@@ -12,6 +12,7 @@ JiebaConfig::JiebaConfig(const string &configPath)
 : _configPath(configPath)
 {
     size_t pos = configPath.find_last_of('/');
+    _configDir = configPath.substr(0, pos);
 
     ifstream ifs(_configPath);
     if (!ifs.is_open())
@@ -22,7 +23,6 @@ JiebaConfig::JiebaConfig(const string &configPath)
     string line;
     string section;
     string key, value;
-    int i = 1;
     while (getline(ifs, line))
     {
         if (line.empty()) continue;
@@ -37,6 +37,18 @@ JiebaConfig::JiebaConfig(const string &configPath)
         {
             key = line.substr(0, pos - 1);
             value = line.substr(pos + 2);
+
+            size_t last_pos = value.find_first_not_of("../");
+            size_t n = 0;
+            string dir = _configDir;
+            while (n != last_pos)
+            {
+                size_t conf_pos = dir.find_last_of('/');
+                dir = dir.substr(0, conf_pos);
+                n += 3;
+            }
+
+            value = dir + "/" + value.substr(last_pos);
             _data[section][key] = value;
         }
     }
