@@ -20,16 +20,39 @@ DictProducer::DictProducer(WordConfig wordConf)
 {
     saveStopWords(_wordConf.get("data", "stop_words_eng"));
     saveStopWords(_wordConf.get("data", "stop_words_zh"));
+}
+
+DictProducer::~DictProducer()
+{
+
+}
+
+void DictProducer::createEnDict()
+{
+    cout << "[INFO] Start creating English dictionary..." << endl;
     _enFiles.push_back(_wordConf.get("data", "english"));
     _enFiles.push_back(_wordConf.get("data", "bible"));
+    
+    for (const auto &file : _enFiles)
+    {
+        // 防止文件类型不同
+        ifstream ifs;
+        openEnFile(ifs, file);
+    }
+    cout << "[INFO] English dictionary create done. It has " 
+         << _enDict.size() << " words." << endl;
+}
 
+void DictProducer::createCnDict()
+{
+    cout << "[INFO] Start creating Chinese dictionary..." << endl;
     string dirname = _wordConf.getPath("data", "chinese_dir");
     DIR* dir;
     struct dirent* direntptr;
     dir = opendir(dirname.c_str());
     if (!dir)
     {
-        cout << "This " << dirname.c_str() << " is null." << endl;
+        cerr << "[ERROR] This " << dirname.c_str() << " is null." << endl;
         return;
     }
 
@@ -42,41 +65,19 @@ DictProducer::DictProducer(WordConfig wordConf)
             _cnFiles.push_back(dirname + direntptr->d_name);
         }
     }
-}
 
-DictProducer::~DictProducer()
-{
-
-}
-
-void DictProducer::createEnDict()
-{
-    cout << "Start creating English dictionary..." << endl;
-    for (const auto &file : _enFiles)
-    {
-        // 防止文件类型不同
-        ifstream ifs;
-        openEnFile(ifs, file);
-    }
-    cout << "English dictionary create done. It has " 
-         << _enDict.size() << " words." << endl;
-}
-
-void DictProducer::createCnDict()
-{
-    cout << "Start creating Chinese dictionary..." << endl;
     for (const auto &file : _cnFiles)
     {
         ifstream ifs;
         openCnFile(ifs, file);
     }
-    cout << "Chinese dictionary create done. It has " 
+    cout << "[INFO] Chinese dictionary create done. It has " 
          << _cnDict.size() << " words." << endl;
 }
 
 void DictProducer::createEnIndex()
 {
-    cout << "Start creating English index..." << endl;
+    cout << "[INFO] Start creating English index..." << endl;
     for (char c = 'a'; c <= 'z'; ++c)
     {
         string elem(1, c);
@@ -92,12 +93,12 @@ void DictProducer::createEnIndex()
             _enIndex[elem].insert(_enIdCounter);
         }
     }
-    cout << "English index create done." << endl;
+    cout << "[INFO] English index create done." << endl;
 }
 
 void DictProducer::createCnIndex()
 {
-    cout << "Start creating Chinese index..." << endl;
+    cout << "[INFO] Start creating Chinese index..." << endl;
     for (auto &it : _cnDict)
     {
         // 分配id
@@ -110,7 +111,7 @@ void DictProducer::createCnIndex()
             _cnIndex[*it].insert(_cnIdCounter);
         }
     }
-    cout << "Chinese index create done." << endl;
+    cout << "[INFO] Chinese index create done." << endl;
 }
 
 void DictProducer::store()
@@ -148,12 +149,11 @@ void DictProducer::saveStopWords(const string &fileName)
     string name = fileName.substr(pos + 1);
     if (!ifs.is_open())
     {
-        cerr << "Open file: " << name << " failed!" << endl;
+        cerr << "[ERROR] Open file \"" << name << "\" failed!" << endl;
         return;
     }
 
-    cout << "Open file: " << name << " successfully." << endl;
-    cout << "Reading..." << endl;
+    cout << "[INFO] Open file \"" << name << "\" successfully. Reading..." << endl;
 
     // 默认停用词库文件单行一个单词
     string word;
@@ -169,7 +169,7 @@ void DictProducer::saveStopWords(const string &fileName)
         _stopWords.insert(word);
     }
 
-    cout << "Read done." << endl;
+    cout << "[INFO] Read done." << endl;
     ifs.close();
 }
 
@@ -202,11 +202,11 @@ void DictProducer::openEnFile(ifstream &ifs, const string &fileName)
     string name = fileName.substr(pos + 1);
     if (!ifs.is_open())
     {
-        cerr << "Open file: " << name << " failed!" << endl;
+        cerr << "[ERROR] Open file \"" << name << "\" failed!" << endl;
         return;
     }
-    cout << "Open file: " << name << " successfully." << endl;
-    cout << "Reading..." << endl;
+
+    cout << "[INFO] Open file \"" << name << "\" successfully. Reading..." << endl;
 
     string line;
     while (getline(ifs, line))
@@ -214,7 +214,7 @@ void DictProducer::openEnFile(ifstream &ifs, const string &fileName)
         processEnLine(line);
     }
 
-    cout << "Read done." << endl;
+    cout << "[INFO] Read done." << endl;
 }
 
 void DictProducer::openCnFile(ifstream &ifs, const string &fileName)
@@ -224,11 +224,11 @@ void DictProducer::openCnFile(ifstream &ifs, const string &fileName)
     string name = fileName.substr(pos + 1);
     if (!ifs.is_open())
     {
-        cerr << "Open file: " << name << " failed!" << endl;
+        cerr << "[ERROR] Open file \"" << name << "\" failed!" << endl;
         return;
     }
-    cout << "Open file: " << name << " successfully." << endl;
-    cout << "Reading..." << endl;
+
+    cout << "[INFO] Open file \"" << name << "\" successfully. Reading..." << endl;
 
     string line;
     while (getline(ifs, line))
@@ -236,7 +236,7 @@ void DictProducer::openCnFile(ifstream &ifs, const string &fileName)
         processCnLine(line);
     }
 
-    cout << "Read done." << endl;
+    cout << "[INFO] Read done." << endl;
 }
 
 void DictProducer::inputFile(ofstream &ofs, const string &fileName)
@@ -246,11 +246,11 @@ void DictProducer::inputFile(ofstream &ofs, const string &fileName)
     string name = fileName.substr(pos + 1);
     if (!ofs.is_open())
     {
-        cerr << "Open file: " << name << " failed." << endl;
+        cerr << "[ERROR] Open file \"" << name << "\" failed!" << endl;
         return;
     }
-    cout << "Open file: " << name << " successfully." << endl;
-    cout << "Writing..." << endl;
+
+    cout << "[INFO] Open file \"" << name << "\" successfully. Writing..." << endl;
 
     if (name == "en_dict.dat")
     {
@@ -310,7 +310,7 @@ void DictProducer::inputFile(ofstream &ofs, const string &fileName)
 
     }
 
-    cout << "Write done." << endl;
+    cout << "[INFO] Write done." << endl;
     ofs.close();
 }
 

@@ -18,7 +18,7 @@ WordSegmentation::WordSegmentation()
          
          _jiebaConf.get("jieba", "stop_word").c_str())  // 停用词路径
 {
-    cout << "jieba init" << endl;
+    cout << "[INFO] Jieba inited." << endl;
 }
 
 vector<string> WordSegmentation::operator()(const string str)

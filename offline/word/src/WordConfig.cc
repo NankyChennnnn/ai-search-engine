@@ -16,7 +16,7 @@ WordConfig::WordConfig(const string &configPath)
     ifstream ifs(_configPath);
     if (!ifs.is_open())
     {
-        cerr << "Open config file failed." << endl;
+        cerr << "[ERROR] Open config file failed." << endl;
     }
 
     string line;
@@ -69,8 +69,8 @@ string WordConfig::get(const string &section, const string &key) const
         {
             if (data->second.back() == '/')
             {
-                cerr << "Error: Use getPath(section, key) to get directory." << endl;
-                return "Error";
+                cerr << "[ERROR] Use getPath(section, key) to get directory." << endl;
+                return "ERROR";
             }
 
             if (section == "output" && key != "output_dir")
@@ -83,7 +83,7 @@ string WordConfig::get(const string &section, const string &key) const
                 value = data->second;
             }
 
-            cout << "Info: Find [" << section << "][" << key << "]" << endl;
+            cout << "[INFO] Find [" << section << "][" << key << "]" << endl;
         }
     }
     return value;
@@ -100,12 +100,12 @@ string WordConfig::getPath(const string &section, const string &key) const
         {
             if (data->second.back() != '/')
             {
-                cerr << "Error: Use get(section, key) to get file path." << endl;
-                return "Error";
+                cerr << "[ERROR] Use get(section, key) to get file path." << endl;
+                return "ERROR";
             }
 
             value = data->second;
-            cout << "Info: Find [" << section << "][" << key << "]" << endl;
+            cout << "[INFO] Find [" << section << "][" << key << "]" << endl;
         }
     }
     return value;

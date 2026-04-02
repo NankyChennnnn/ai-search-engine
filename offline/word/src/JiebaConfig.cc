@@ -17,7 +17,7 @@ JiebaConfig::JiebaConfig(const string &configPath)
     ifstream ifs(_configPath);
     if (!ifs.is_open())
     {
-        cerr << "Open config file failed." << endl;
+        cerr << "[ERROR] Open config file failed." << endl;
     }
 
     string line;
@@ -62,10 +62,10 @@ const string& JiebaConfig::get(const string &section, const string &key) const
         auto data = it->second.find(key);
         if (data != it->second.end())
         {
-            cout << "Info: Find [" << section << "][" << key << "]" << endl;
+            cout << "[INFO] Find [" << section << "][" << key << "]" << endl;
             return data->second;
         }
     }
 
-    throw std::runtime_error("Error: Cannot find [" + section + "][" + key + "]");
+    throw std::runtime_error("[ERROR] Cannot find [" + section + "][" + key + "]");
 }
