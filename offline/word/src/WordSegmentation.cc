@@ -1,4 +1,5 @@
 #include "WordSegmentation.h"
+#include "cppjieba/Unicode.hpp"
 
 JiebaConfig _jiebaConf(JIEBA_CONF_PATH);
 
@@ -28,3 +29,20 @@ vector<string> WordSegmentation::operator()(const string str)
     return words;
 }
 
+vector<string> WordSegmentation::DecodeRunesInString(const string &str)
+{
+    vector<string> words;
+    cppjieba::RuneStrArray runes;
+    if (!cppjieba::DecodeRunesInString(str, runes))
+    {
+        return words;
+    }
+
+    words.reserve(runes.size());
+    for (const auto &r : runes)
+    {
+        words.push_back(str.substr(r.offset, r.len));
+    }
+
+    return words;
+}

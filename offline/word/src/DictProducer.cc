@@ -1,4 +1,5 @@
 #include "DictProducer.h"
+#include "WordSegmentation.h"
 #include <cctype>
 #include <iostream>
 #include <sstream>
@@ -13,7 +14,8 @@ using std::cerr;
 using std::istringstream;
 
 DictProducer::DictProducer(WordConfig wordConf)
-: _idCounter(0)
+: _enIdCounter(0)
+, _cnIdCounter(0)
 , _wordConf(wordConf)
 {
     saveStopWords(_wordConf.get("data", "stop_words_eng"));
@@ -78,16 +80,16 @@ void DictProducer::createEnIndex()
     for (char c = 'a'; c <= 'z'; ++c)
     {
         string elem(1, c);
-        _index[elem];
+        _enIndex[elem];
     }
     
     for (auto &it : _enDict)
     {
-        _idMap[++_idCounter] = it.first;
+        _enIdMap[++_enIdCounter] = it.first;
         for (char c : it.first)
         {
             string elem(1, c);
-            _index[elem].insert(_idCounter);
+            _enIndex[elem].insert(_enIdCounter);
         }
     }
     cout << "English index create done." << endl;
@@ -95,7 +97,20 @@ void DictProducer::createEnIndex()
 
 void DictProducer::createCnIndex()
 {
+    cout << "Start creating Chinese index..." << endl;
+    for (auto &it : _cnDict)
+    {
+        // 分配id
+        _cnIdMap[++_cnIdCounter] = it.first;
 
+        // 拆分汉字，插入id
+        vector<string> words = _wordSeg.DecodeRunesInString(it.first);
+        for (auto it = words.begin(); it != words.end(); ++it)
+        {
+            _cnIndex[*it].insert(_cnIdCounter);
+        }
+    }
+    cout << "Chinese index create done." << endl;
 }
 
 void DictProducer::store()
@@ -180,6 +195,7 @@ void DictProducer::processCnLine(string &line)
     vector<string> results = _wordSeg(line);
     for (auto it = results.begin(); it != results.end(); ++it)
     {
+        if (isStopWord(*it)) continue;
         insertToCnMap(*it);
     }
 }
@@ -250,7 +266,7 @@ void DictProducer::inputFile(ofstream &ofs, const string &fileName)
     }
     else if (name == "en_index.dat")
     {
-        for (auto &it : _index)
+        for (auto &it : _enIndex)
         {
             ofs << "\"" << it.first << "\" : { ";
             bool first = true;
@@ -275,6 +291,28 @@ void DictProducer::inputFile(ofstream &ofs, const string &fileName)
         {
             ofs << it->first << "    " << it->second << endl;
         }
+    }
+    else if (name == "cn_index.dat")
+    {
+        for (auto &it : _cnIndex)
+        {
+            ofs << "\"" << it.first << "\" : { ";
+            bool first = true;
+            for (auto &num : it.second)
+            {
+                if (first)
+                {
+                    ofs << num;
+                    first = false;
+                }
+                else
+                {
+                    ofs << ", " << num;
+                }
+            }
+            ofs << " }" << endl;
+        }
+
     }
 
     cout << "Write done." << endl;

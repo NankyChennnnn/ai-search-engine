@@ -16,6 +16,8 @@ int main()
     dp.createEnIndex();
     cout << endl << "=============== Create Chinese Dictionary ===============" << endl;
     dp.createCnDict();
+    cout << endl << "=============== Create Chinese Index ===============" << endl;
+    dp.createCnIndex();
     cout << endl << "=============== Store .dat Files ===============" << endl;
     dp.store();
     return 0;

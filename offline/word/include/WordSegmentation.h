@@ -19,6 +19,7 @@ class WordSegmentation
 public:
     WordSegmentation();
     vector<string> operator()(const string str);
+    vector<string> DecodeRunesInString(const string &str);
 
 private:
     cppjieba::Jieba _jieba;
