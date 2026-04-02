@@ -39,7 +39,6 @@ private:
 
     // 文件处理
     void saveStopWords(const string &fileName);
-    void insertEnIndex(const string &elem, size_t id);
     void processEnLine(string &line);
     void processCnLine(string &line);
     void openEnFile(ifstream &ifs, const string &fileName);

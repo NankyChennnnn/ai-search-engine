@@ -173,11 +173,6 @@ void DictProducer::saveStopWords(const string &fileName)
     ifs.close();
 }
 
-void DictProducer::insertEnIndex(const string &elem, size_t id)
-{
-
-}
-
 void DictProducer::processEnLine(string &line)
 {
     istringstream iss(line);
