@@ -13,6 +13,7 @@
 using std::vector;
 using std::string;
 using std::unordered_map;
+using std::unordered_set;
 using std::set;
 using std::pair;
 
@@ -24,11 +25,17 @@ public:
 
     void cutRedundantPage(vector<RssItem> &rss, 
                           const simhash::Simhasher &simhasher); // 网页去重
+    void buildStopWordsMap(const string &path);
     void buildInvertIndexMap(vector<RssItem> &rss, // 建立倒排索引库
                              const cppjieba::Jieba &jieba);
-    void storeOnDisk(const string path); // 存两个dat文件
+    void storeOnDisk(const string &path); // 存两个dat文件
 
 private:
+    bool isValidWord(const string &word);
+    bool isStopWord(const string &word);
+
+private:
+    unordered_set<string> _stopWords;
     unordered_map<string, set<pair<int , double>>> _invertIndexLib; // <word, <docid, weight>>
 };
 

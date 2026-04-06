@@ -6,6 +6,7 @@
 
 using std::cout;
 using std::endl;
+using std::ifstream;
 using std::ofstream;
 
 PageLibPreprocessor::PageLibPreprocessor()
@@ -77,6 +78,36 @@ void PageLibPreprocessor::cutRedundantPage(vector<RssItem> &rss,
     
 }
 
+void PageLibPreprocessor::buildStopWordsMap(const string &path)
+{
+    ifstream ifs(path);
+    size_t pos = path.find_last_of('/');
+    string name = path.substr(pos + 1);
+    if (!ifs.is_open())
+    {
+        throw std::runtime_error("[ERROR] Open file \"" + name + "\" failed!");
+    }
+
+    cout << "[INFO] Open file \"" << name << "\" successfully. Reading..." << endl;
+
+    // 默认停用词库文件单行一个单词
+    string word;
+    while (getline(ifs, word))
+    {
+        // 清除首位空白内容
+        word.erase(0, word.find_first_not_of(" \t\n\r"));
+        word.erase(word.find_last_not_of(" \t\n\r") + 1);
+
+        // 跳过空行和注释
+        if (word.empty() || word[0] == '#') continue;
+
+        _stopWords.insert(word);
+    }
+
+    cout << "[INFO] Read done." << endl;
+    ifs.close();
+}
+
 void PageLibPreprocessor::
 buildInvertIndexMap(vector<RssItem> &rss,
                     const cppjieba::Jieba &jieba)
@@ -93,6 +124,9 @@ buildInvertIndexMap(vector<RssItem> &rss,
         jieba.CutAll(description, results);
         for (auto &word : results)
         {
+            if (!isValidWord(word)) continue;
+            if (isStopWord(word)) continue;
+
             if (tf[word][docid])
             {
                 ++tf[word][docid];                
@@ -164,7 +198,7 @@ buildInvertIndexMap(vector<RssItem> &rss,
          << "Invert index lib size is " << _invertIndexLib.size() << "." << endl;
 }
 
-void PageLibPreprocessor::storeOnDisk(const string path)
+void PageLibPreprocessor::storeOnDisk(const string &path)
 {
     ofstream ofs(path);
     if (!ofs.is_open())
@@ -191,4 +225,46 @@ void PageLibPreprocessor::storeOnDisk(const string path)
         }
         ofs << " }" << endl;
     }
+    ofs.close();
+}
+
+bool PageLibPreprocessor::isValidWord(const string &word)
+{
+    // 空串过滤
+    if (word.empty()) return false;
+    
+    // 按 UTF-8 拆分字符，返回false则无法正确拆分，字符有问题，丢弃
+    cppjieba::RuneStrArray runes;
+    if (!cppjieba::DecodeRunesInString(word, runes))
+    {
+        return false;
+    }
+
+    // 拆解成功后，遍历字符数组
+    for (const auto &rs : runes)
+    {
+        // 常用汉字范围，在内保留
+        if (rs.rune >= 0x4E00 && rs.rune <= 0x9FFF) return true;
+
+        // 字符在ASCII范围内，保留
+        if (rs.rune < 0x80 && std::isalnum(static_cast<unsigned char>(rs.rune)))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool PageLibPreprocessor::isStopWord(const string &word)
+{
+    for (auto &stopWord : _stopWords)
+    {
+        if (word == stopWord)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }

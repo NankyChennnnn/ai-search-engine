@@ -66,6 +66,9 @@ void PageLib::deduplication()
 void PageLib::handleInvertIndex()
 {
     cout << "[INFO] Invert index lib building..." << endl;
+    const string RAW = _conf.getConfig("raw_data_dir");
+    const string ZH = _conf.getConfig("stop_words_zh");
+    _plPreprocessor.buildStopWordsMap(RAW + ZH);
     _plPreprocessor.buildInvertIndexMap(_rss, _jieba);
 }
 
@@ -116,6 +119,8 @@ void PageLib::store()
         docsz = doc.size();
         ofs_offsetlib << docid << " " << doc_offset << " " << docsz << endl;
     }
+    ofs_pagelib.close();
+    ofs_offsetlib.close();
 
     _plPreprocessor.storeOnDisk(indexlib);
 
