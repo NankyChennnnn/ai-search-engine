@@ -21,6 +21,8 @@ public:
     vector<string> doQuery(const string &key);
 
 private:
+    void createDict();
+    void createIndex();
     void queryIndex();
     int distance(string candidate);
 
@@ -33,7 +35,7 @@ private:
 private:
     Configuration &_conf;
     vector<pair<string, int>> _dict;
-    map<int, set<int>> _index;
+    map<string, set<int>> _index;
 };
 
 #endif
