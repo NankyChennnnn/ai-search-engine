@@ -191,6 +191,7 @@ void DictProducer::processCnLine(string &line)
     vector<string> results = _wordSeg(line);
     for (auto it = results.begin(); it != results.end(); ++it)
     {
+        if (!isValidWord(*it)) continue;
         if (isStopWord(*it)) continue;
         insertToCnMap(*it);
     }
@@ -344,6 +345,34 @@ string DictProducer::dealEnWord(const string &word)
     }
 
     return lower;
+}
+
+bool DictProducer::isValidWord(const string &word)
+{
+    // 空串过滤
+    if (word.empty()) return false;
+    
+    // 按 UTF-8 拆分字符，返回false则无法正确拆分，字符有问题，丢弃
+    cppjieba::RuneStrArray runes;
+    if (!cppjieba::DecodeRunesInString(word, runes))
+    {
+        return false;
+    }
+
+    // 拆解成功后，遍历字符数组
+    for (const auto &rs : runes)
+    {
+        // 常用汉字范围，在内保留
+        if (rs.rune >= 0x4E00 && rs.rune <= 0x9FFF) return true;
+
+        // 字符在ASCII范围内，保留
+        if (rs.rune < 0x80 && std::isalnum(static_cast<unsigned char>(rs.rune)))
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void DictProducer::insertToEnMap(const string &word)

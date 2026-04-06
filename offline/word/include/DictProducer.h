@@ -48,6 +48,7 @@ private:
     // 单词处理
     string dealEnWord(const string &word);
     void insertToEnMap(const string &word);
+    bool isValidWord(const string &word);
     void insertToCnMap(const string &word);
 
 private:
