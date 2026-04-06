@@ -1,9 +1,8 @@
 #include "PageLib.h"
 #include "Configuration.h"
 #include <iostream>
-#include <set>
 #include <fstream>
-#include <utility>
+#include <sys/stat.h>
 
 using std::cout;
 using std::endl;
@@ -73,12 +72,24 @@ void PageLib::handleInvertIndex()
 void PageLib::store()
 {
     string output_dir = _conf.getConfig("output_dir");
+    struct stat st;
+    if (stat((output_dir).c_str(), &st) == 0 &&
+        S_ISDIR(st.st_mode))
+    {
+        cout << "[INFO] Find output dir \"" << output_dir << "\"." << endl;
+    }
+    else
+    {
+        mkdir((output_dir).c_str(), 0755);
+        cout << "[INFO] Create output dir \"" << output_dir << "\"." << endl;
+    }
+
     cout << "[INFO] Storing \"pagelib.dat\", \"offsetlib.dat\" and \"indexlib.dat\""
          << " to \"" << output_dir << "\"..." << endl;
     
-    string pagelib = output_dir + "/" + "pagelib.dat";
-    string offsetlib = output_dir + "/" + "offsetlib.dat";
-    string indexlib = output_dir + "/" + "indexlib.dat";
+    string pagelib = output_dir + "pagelib.dat";
+    string offsetlib = output_dir + "offsetlib.dat";
+    string indexlib = output_dir + "indexlib.dat";
     
     ofstream ofs_pagelib(pagelib);
     ofstream ofs_offsetlib(offsetlib);
@@ -111,15 +122,45 @@ void PageLib::store()
     cout << "[INFO] Store .dat files done."<< endl;
 }
 
-string PageLib::makeDoc(RssItem item, int docid)
+string PageLib::makeDoc(const RssItem &item, int docid)
 {
     std::ostringstream oss;
     oss << "<doc>\n" 
         << "\t<docid>" << docid << "</docid>\n"
-        << "\t<title>" << item.title << "</title>\n"
-        << "\t<link>" << item.link << "</link>\n"
-        << "\t<description>" << item.description << "</description>\n"
-        << "\t<content>" << item.content << "</content>\n"
+        << "\t<title>" << escapeXml(item.title) << "</title>\n"
+        << "\t<link>" << escapeXml(item.link) << "</link>\n"
+        << "\t<description>" << escapeXml(item.description) << "</description>\n"
+        << "\t<content>" << escapeXml(item.content) << "</content>\n"
         << "</doc>\n";
     return oss.str();
+}
+
+string PageLib::escapeXml(const string &elem)
+{
+    string result;
+    for (char ch : elem)
+    {
+        switch (ch)
+        {
+        case '&':
+            result += "&amp;";
+            break;
+        case '<':
+            result += "&lt;";
+            break;
+        case '>':
+            result += "&gt;";
+            break;
+        case '\"':
+            result += "&quot;";
+            break;
+        case '\'':
+            result += "&apos;";
+            break;
+        default:
+            result += ch;
+            break;
+        }
+    }
+    return result;
 }

@@ -3,10 +3,12 @@
 
 #include <string>
 #include <vector>
-#include "RssItem.h"
+#include "XmlReader.h"
+#include "tinyxml2/tinyxml2.h"
 
 using std::string;
 using std::vector;
+using namespace tinyxml2;
 
 class FileProcessor
 {
@@ -14,7 +16,10 @@ public:
     FileProcessor();
     ~FileProcessor();
 
-    void process(const string fileName, vector<RssItem> &rss);
+    void process(const string &fileName, vector<RssItem> &rss);
+
+private:
+    string getText(XMLElement *elem);
 };
 
 #endif

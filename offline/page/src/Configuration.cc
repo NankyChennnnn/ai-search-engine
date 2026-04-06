@@ -6,7 +6,6 @@
 
 using std::cout;
 using std::endl;
-using std::cerr;
 using std::ifstream;
 
 Configuration &Configuration::getInstance()
@@ -24,8 +23,7 @@ Configuration::Configuration()
     ifstream ifs(_configFilePath);
     if (!ifs.is_open())
     {
-        cerr << "[ERROR] Open config file \"" << name << "\" failed" << endl;
-        return;
+        throw std::runtime_error("[ERROR] Open config file \"" + name + "\" failed");
     }
 
     cout << "[INFO] Open config file \"" << name << "\" successfully. Reading..." << endl;

@@ -8,7 +8,7 @@
 #include <utility>
 #include "cppjieba/Jieba.hpp"
 #include "simhash/Simhasher.hpp"
-#include "RssItem.h"
+#include "XmlReader.h"
 
 using std::vector;
 using std::string;

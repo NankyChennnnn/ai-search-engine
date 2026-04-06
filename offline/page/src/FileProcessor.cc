@@ -1,10 +1,7 @@
 #include "FileProcessor.h"
 #include <stdexcept>
 #include <regex>
-#include "RssItem.h"
-#include "tinyxml2/tinyxml2.h"
 
-using namespace tinyxml2;
 using std::regex;
 using std::regex_replace;
 
@@ -18,7 +15,7 @@ FileProcessor::~FileProcessor()
 
 }
 
-void FileProcessor::process(const string fileName, vector<RssItem> &rss)
+void FileProcessor::process(const string &fileName, vector<RssItem> &rss)
 {
     XMLDocument doc;
     doc.LoadFile(fileName.c_str());
@@ -41,28 +38,17 @@ void FileProcessor::process(const string fileName, vector<RssItem> &rss)
         XMLElement *encodedElem = itemNode->FirstChildElement("content:encoded");
 
         string title, link, description, content; 
-        if (titleElem)
-        {
-            title = titleElem->GetText();
-        }
-
-        if (linkElem)
-        {
-            link = linkElem->GetText();
-        }
-
-        if (descriptionElem)
-        {
-            description = descriptionElem->GetText();
-        }
+        title = getText(titleElem);
+        link = getText(linkElem);
+        description = getText(descriptionElem);
 
         if (contentElem)
         {
-            content = contentElem->GetText();
+            content = getText(contentElem);
         }
         else if (encodedElem)
         {
-            content = encodedElem->GetText();
+            content = getText(encodedElem);
         }
 
         regex rgx("<[^>]+>"); // find <...></...>
@@ -79,4 +65,23 @@ void FileProcessor::process(const string fileName, vector<RssItem> &rss)
         
         itemNode = itemNode->NextSiblingElement("item"); // find next item
     }
+}
+
+string FileProcessor::getText(XMLElement *elem)
+{
+    if (elem)
+    {
+        if (elem->GetText() != nullptr)
+        {
+            string text = elem->GetText();
+            size_t pos = 0;
+            while ((pos = text.find("&nbsp;"), pos) != string::npos)
+            {
+                text.replace(pos, 6, " ");
+            }
+
+            return text;
+        }
+    }
+    return "";
 }

@@ -2,9 +2,9 @@
 #include "simhash/Simhasher.hpp"
 #include <iostream>
 #include <fstream>
+#include <stdexcept>
 
 using std::cout;
-using std::cerr;
 using std::endl;
 using std::ofstream;
 
@@ -119,8 +119,10 @@ buildInvertIndexMap(vector<RssItem> &rss,
             
             // IDF = log2(总文档数 / (包含该词的文档数 + 1))
             // DF 越大，分母越大，IDF 越小，稀有度越低
-            // +1 是为了防止分母特殊情况，并且让公式更平滑
-            double IDF = log(1.0 * DOCNUM / (DF + 1)) / log(2);
+            // 分母 +1 是为了防止分母特殊情况
+            // 分子 +1 是为了防止负权值
+            // 也能让公式更平滑
+            double IDF = log((1.0 * DOCNUM + 1) / (DF + 1)) / log(2);
             
             // final weight
             // 当前文章出现的多（TF大），整体网页库中又出现的少（IDF大），权重就会大
@@ -167,8 +169,7 @@ void PageLibPreprocessor::storeOnDisk(const string path)
     ofstream ofs(path);
     if (!ofs.is_open())
     {
-        cerr << "[ERROR] Open \"indexlib.dat\" failed." << endl;
-        return;
+        throw std::runtime_error("[ERROR] Open \"indexlib.dat\" failed.");
     }
 
     for (auto it = _invertIndexLib.begin(); it != _invertIndexLib.end(); ++it)

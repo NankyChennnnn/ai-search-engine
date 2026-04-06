@@ -1,20 +1,18 @@
 #include "DirScanner.h"
 #include <iostream>
 #include <dirent.h>
+#include <stdexcept>
 #include <string.h>
 
 using std::cout;
-using std::cerr;
 using std::endl;
 
 DirScanner::DirScanner()
 {
-
 }
 
 DirScanner::~DirScanner()
 {
-
 }
 
 vector<string>& DirScanner::getFiles()
@@ -29,11 +27,10 @@ void DirScanner::traverse(string dir)
     pDir = opendir(dir.c_str());
     if (!pDir)
     {
-        cerr << "[ERROR] This " << dir.c_str() << " is null." << endl;
-        return;
+        throw std::runtime_error("[ERROR] This " + dir + " is null.");
     }
 
-    cout << "[INFO] Find dir: \"" << dir.c_str() << "\". Reading..." << endl;
+    cout << "[INFO] Find dir: \"" << dir << "\". Reading..." << endl;
 
     while((direntptr = readdir(pDir)) != nullptr)
     {

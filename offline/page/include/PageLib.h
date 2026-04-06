@@ -25,7 +25,8 @@ public:
     void store();
 
 private:
-    string makeDoc(RssItem item, int docid);
+    string makeDoc(const RssItem &item, int docid);
+    string escapeXml(const string &elem);
 
 private:
     vector<RssItem> _rss;
