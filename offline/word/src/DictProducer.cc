@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <string.h>
+#include <sys/stat.h>
 
 using std::cout;
 using std::endl;
@@ -241,6 +242,19 @@ void DictProducer::openCnFile(ifstream &ifs, const string &fileName)
 
 void DictProducer::inputFile(ofstream &ofs, const string &fileName)
 {
+    string output_dir = _wordConf.getPath("output", "output_dir");
+    struct stat st;
+    if (stat((output_dir).c_str(), &st) == 0 &&
+        S_ISDIR(st.st_mode))
+    {
+        cout << "[INFO] Find output dir \"" << output_dir << "\"." << endl;
+    }
+    else
+    {
+        mkdir((output_dir).c_str(), 0755);
+        cout << "[INFO] Create output dir \"" << output_dir << "\"." << endl;
+    }
+
     ofs.open(fileName);
     size_t pos = fileName.find_last_of('/');
     string name = fileName.substr(pos + 1);
