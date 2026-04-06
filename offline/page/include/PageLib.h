@@ -34,7 +34,6 @@ private:
     FileProcessor _fileProcessor;
     PageLibPreprocessor _plPreprocessor;
     cppjieba::Jieba _jieba;
-    unordered_map<string, set<pair<int , double>>> _invertIndex; // <word, <docid, weight>>
 };
 
 #endif

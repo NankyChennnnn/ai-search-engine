@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
+#include <stdexcept>
 
 using std::cout;
 using std::endl;
@@ -76,13 +77,12 @@ const string &Configuration::getConfig(const string &key) const
     auto it = _configs.find(key);
     if (it == _configs.end())
     {
-        cerr << "[ERROR] Cannot find config key: \"" << key << "\"." << endl;
+        throw std::runtime_error("[ERROR] Cannot find config key: \"" + key + "\".");
     }
     else
     {
         cout << "[INFO] Find config key: \"" << key << "\"." << endl;
+        return it->second;
     }
-
-    return it->second;
 }
 

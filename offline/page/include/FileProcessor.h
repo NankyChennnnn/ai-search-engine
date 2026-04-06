@@ -2,8 +2,11 @@
 #define __FILEPROCESSOR_H__
 
 #include <string>
+#include <vector>
+#include "RssItem.h"
 
 using std::string;
+using std::vector;
 
 class FileProcessor
 {
@@ -11,10 +14,7 @@ public:
     FileProcessor();
     ~FileProcessor();
 
-    string process(string fileName);
-
-private:
-    string _titleFeature;
+    void process(const string fileName, vector<RssItem> &rss);
 };
 
 #endif

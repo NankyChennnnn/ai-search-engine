@@ -1,14 +1,19 @@
 #include "PageLibPreprocessor.h"
 #include "simhash/Simhasher.hpp"
+#include <iostream>
+#include <fstream>
+
+using std::cout;
+using std::cerr;
+using std::endl;
+using std::ofstream;
 
 PageLibPreprocessor::PageLibPreprocessor()
 {
-
 }
 
 PageLibPreprocessor::~PageLibPreprocessor()
 {
-
 }
 
 void PageLibPreprocessor::cutRedundantPage(vector<RssItem> &rss, 
@@ -69,11 +74,11 @@ void PageLibPreprocessor::cutRedundantPage(vector<RssItem> &rss,
             rss.erase(rss.begin() + id);
         }
     }
+    
 }
 
 void PageLibPreprocessor::
 buildInvertIndexMap(vector<RssItem> &rss,
-                    unordered_map<string, set<pair<int , double>>> &invertIndex,
                     const cppjieba::Jieba &jieba)
 {
     size_t DOCNUM = rss.size();
@@ -149,12 +154,40 @@ buildInvertIndexMap(vector<RssItem> &rss,
             double w = num->second;
             double final_w = w / modulus;
             // <word, <docid, final_w>>
-            invertIndex[word].insert(std::make_pair(docid, final_w));
+            _invertIndexLib[word].insert(std::make_pair(docid, final_w));
         }
     }
+    
+    cout << "[INFO] Create invert index lib successful. " 
+         << "Invert index lib size is " << _invertIndexLib.size() << "." << endl;
 }
 
-void PageLibPreprocessor::storeOnDisk()
+void PageLibPreprocessor::storeOnDisk(const string path)
 {
+    ofstream ofs(path);
+    if (!ofs.is_open())
+    {
+        cerr << "[ERROR] Open \"indexlib.dat\" failed." << endl;
+        return;
+    }
 
+    for (auto it = _invertIndexLib.begin(); it != _invertIndexLib.end(); ++it)
+    {
+        bool first = true;
+        string word = it->first;
+        ofs << "\"" << word << "\" : {";
+        for (auto num = it->second.begin(); num != it->second.end(); ++num)
+        {
+            if (first)
+            {
+                ofs << " " << num->first << ":" << num->second;
+                first = false;
+            }
+            else
+            {
+                ofs << ", " << num->first << ":" << num->second;
+            }
+        }
+        ofs << " }" << endl;
+    }
 }
