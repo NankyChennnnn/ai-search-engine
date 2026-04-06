@@ -1,8 +1,8 @@
-#include <iostream>
+#include "SearchEngineServer.h"
 
-int main()
+int main(int argc, char *argv[])
 {
-    std::cout << "Hello world" << std::endl;
+    SearchEngineServer server(argv[1]);
     return 0;
 }
 

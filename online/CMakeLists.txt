@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(ai-search-engine-online LANGUAGES CXX)
-
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    project(ai-search-engine-online LANGUAGES CXX)
+    
+    set(CMAKE_CXX_STANDARD 14)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    set(CMAKE_CXX_EXTENSIONS OFF)
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+endif()
 
 get_filename_component(REPO_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/.." ABSOLUTE)
 set(THIRD_PARTY_DIR "${REPO_ROOT}/third_party")
@@ -21,6 +23,7 @@ file(GLOB ONLINE_SOURCES CONFIGURE_DEPENDS
     "${RECOMMEND_DIR}/src/*.cc"
     "${SEARCH_DIR}/src/*.cc"
     "${CACHE_DIR}/src/*.cc"
+    "${SERVER_DIR}/src/*.cc"
     "${SERVER_DIR}/*.cc")
 
 add_executable(server ${ONLINE_SOURCES})
@@ -33,8 +36,11 @@ target_include_directories(server PRIVATE
     "${RECOMMEND_DIR}/include"
     "${SEARCH_DIR}/include"
     "${CACHE_DIR}/include"
-    "${THIRD_PARTY_DIR}"
-)
+    "${SERVER_DIR}/include"
+    "${THIRD_PARTY_DIR}")
+
+target_compile_definitions(server PRIVATE
+    ONLINE_CONF_PATH="${CMAKE_CURRENT_SOURCE_DIR}/conf/online.conf")
 
 message(STATUS "page source dir: ${CMAKE_CURRENT_SOURCE_DIR}")
 message(STATUS "repo root: ${REPO_ROOT}")
