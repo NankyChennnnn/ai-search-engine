@@ -75,11 +75,11 @@ const string &Configuration::getConfig(const string &key) const
     auto it = _configs.find(key);
     if (it == _configs.end())
     {
-        throw std::runtime_error("[ERROR] Cannot find config key: \"" + key + "\".");
+        throw std::runtime_error("[ERROR] Cannot find config [" + key + "] value.");
     }
     else
     {
-        cout << "[INFO] Find config key: \"" << key << "\"." << endl;
+        cout << "[INFO] Find config [" << key << "] value." << endl;
         return it->second;
     }
 }

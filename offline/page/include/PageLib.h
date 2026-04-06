@@ -29,12 +29,19 @@ private:
     string escapeXml(const string &elem);
 
 private:
-    vector<RssItem> _rss;
     Configuration &_conf;
+    const string DICT;
+    const string HMM;
+    const string USER;
+    const string IDF;
+    const string STOP_WORD;
+    cppjieba::Jieba _jieba;
+    
+private:
+    vector<RssItem> _rss;
     DirScanner _dirScanner;
     FileProcessor _fileProcessor;
     PageLibPreprocessor _plPreprocessor;
-    cppjieba::Jieba _jieba;
 };
 
 #endif

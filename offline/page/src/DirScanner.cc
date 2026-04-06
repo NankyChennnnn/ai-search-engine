@@ -20,17 +20,17 @@ vector<string>& DirScanner::getFiles()
     return _files;
 }
 
-void DirScanner::traverse(string dir)
+void DirScanner::traverse(const string &name, const string &dir)
 {
     DIR* pDir;
     struct dirent* direntptr;
     pDir = opendir(dir.c_str());
     if (!pDir)
     {
-        throw std::runtime_error("[ERROR] This " + dir + " is null.");
+        throw std::runtime_error("[ERROR] Directory \"" + name + "\" is null.");
     }
 
-    cout << "[INFO] Find dir: \"" << dir << "\". Reading..." << endl;
+    cout << "[INFO] Find raw data directory \"" << name << "\". Scanning..." << endl;
 
     while((direntptr = readdir(pDir)) != nullptr)
     {
@@ -41,6 +41,6 @@ void DirScanner::traverse(string dir)
             _files.push_back(dir + direntptr->d_name);
         }
     }
-    cout << "[INFO] Read done." << endl;
+    cout << "[INFO] Scan done." << endl;
 }
 

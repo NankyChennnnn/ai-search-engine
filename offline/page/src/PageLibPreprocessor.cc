@@ -160,7 +160,7 @@ buildInvertIndexMap(vector<RssItem> &rss,
         }
     }
     
-    cout << "[INFO] Create invert index lib successful. " 
+    cout << "[INFO] Build invert index lib successful. " 
          << "Invert index lib size is " << _invertIndexLib.size() << "." << endl;
 }
 

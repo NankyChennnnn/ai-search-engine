@@ -75,7 +75,7 @@ string FileProcessor::getText(XMLElement *elem)
         {
             string text = elem->GetText();
             size_t pos = 0;
-            while ((pos = text.find("&nbsp;"), pos) != string::npos)
+            while ((pos = text.find("&nbsp;", pos)) != string::npos)
             {
                 text.replace(pos, 6, " ");
             }

@@ -14,7 +14,7 @@ public:
     ~DirScanner();
 
     vector<string>& getFiles();
-    void traverse(string dir);
+    void traverse(const string &name, const string &dir);
 
 private:
     vector<string> _files;

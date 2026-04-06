@@ -10,14 +10,17 @@ using std::ofstream;
 
 PageLib::PageLib()
 : _conf(Configuration::getInstance())
-, _jieba(_conf.getConfig("dict"),
-         _conf.getConfig("hmm"),
-         _conf.getConfig("user"),
-         _conf.getConfig("idf"),
-         _conf.getConfig("stop_word"))
+, DICT(_conf.getConfig("dict"))
+, HMM(_conf.getConfig("hmm"))
+, USER(_conf.getConfig("user"))
+, IDF(_conf.getConfig("idf"))
+, STOP_WORD(_conf.getConfig("stop_word"))
+, _jieba(DICT, HMM, USER, IDF, STOP_WORD)
 {
     // store all xml files
-    _dirScanner.traverse(_conf.getConfig("pdo_xml_dir"));
+    const string PDO = "pdo_xml_dir";
+    const string PDO_DIR = _conf.getConfig(PDO);
+    _dirScanner.traverse(PDO, PDO_DIR);
 
     // parse xml files, use tinyxml2
     create();
@@ -53,10 +56,7 @@ void PageLib::create()
 void PageLib::deduplication()
 {
     cout << "[INFO] Page deduplicating..." << endl;
-    simhash::Simhasher simhasher(_conf.getConfig("dict"),
-                                 _conf.getConfig("hmm"),
-                                 _conf.getConfig("idf"),
-                                 _conf.getConfig("stop_word"));
+    simhash::Simhasher simhasher(DICT, HMM, IDF, STOP_WORD);
     _plPreprocessor.cutRedundantPage(_rss, simhasher);
 
     cout << "[INFO] Page deduplication successful. " 
@@ -85,7 +85,7 @@ void PageLib::store()
     }
 
     cout << "[INFO] Storing \"pagelib.dat\", \"offsetlib.dat\" and \"indexlib.dat\""
-         << " to \"" << output_dir << "\"..." << endl;
+         << " to \"output_dir\"..." << endl;
     
     string pagelib = output_dir + "pagelib.dat";
     string offsetlib = output_dir + "offsetlib.dat";
