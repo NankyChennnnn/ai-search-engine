@@ -18,13 +18,14 @@ class Dictionary
 {
 public:
     static Dictionary &getInstance();
-    vector<string> doQuery(const string &key);
+    vector<pair<string, int>> doQuery(const string &key);
+    int getTopk();
 
 private:
     void createDict();
     void createIndex();
-    void queryIndex();
-    int distance(string candidate);
+    set<int> getCandidateIds(const string &key);
+    vector<pair<string, int>> queryIndex(const set<int> &canids);
 
 private:
     Dictionary();

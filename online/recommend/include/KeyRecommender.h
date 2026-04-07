@@ -13,10 +13,13 @@ public:
     KeyRecommender(const string &word);
     ~KeyRecommender();
 
-    string doQuery();
+    vector<CandidateResult> doQuery();
 
 private:
-    /* string _sought; */
+    int distance(const string &word, const string &cand);
+
+private:
+    string _sought;
     priority_queue<CandidateResult> _prique;
 };
 

@@ -1,4 +1,5 @@
 #include "Dictionary.h"
+#include <cstddef>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -14,18 +15,21 @@ Dictionary &Dictionary::getInstance()
     return instance;
 }
 
-vector<string> Dictionary::doQuery(const string &key)
+vector<pair<string, int>> Dictionary::doQuery(const string &key)
 {
-    vector<string> results;
-    for (auto &word : _dict)
-    {
-        size_t pos = word.first.find(key);
-        if (pos != string::npos)
-        {
-            results.push_back(word.first);
-        }
-    }
+    vector<pair<string, int>> results;
+    
+    // 按字符取候选id
+    set<int> canids = getCandidateIds(key);
+
+    // 根据索引找所有候选词
+    results = queryIndex(canids);
     return results;
+}
+
+int Dictionary::getTopk()
+{
+    return std::stoi(_conf.getConfig("topk"));
 }
 
 void Dictionary::createDict()
@@ -47,8 +51,9 @@ void Dictionary::createDict()
         int freq = std::stoi(line.substr(pos + 4));
         _dict.push_back(std::make_pair(word, freq));
     }
-    cout << "[INFO] Scan done." << endl;
+
     ifs.close();
+    cout << "[INFO] Scan done." << endl;
 }
 
 void Dictionary::createIndex()
@@ -94,17 +99,36 @@ void Dictionary::createIndex()
 
     ifs.close();
     cout << "[INFO] Scan done." << endl;
-
 }
 
-void Dictionary::queryIndex()
+set<int> Dictionary::getCandidateIds(const string &key)
 {
-
+    // 拆分key成单个字母
+    // 遍历index，拿到每个字母的所有索引
+    set<int> canids;
+    for (auto &k : key)
+    {
+        string letter(1, k);
+        auto it = _index.find(letter);
+        if (it != _index.end())
+        {
+            canids.insert(it->second.begin(), it->second.end());
+        }
+    }
+    return canids;
 }
 
-int Dictionary::distance(string candidate)
+vector<pair<string, int>> Dictionary::queryIndex(const set<int> &canids)
 {
-    return 0;
+    vector<pair<string, int>> results;
+    for (auto id : canids)
+    {
+        if (id > 0 && static_cast<size_t>(id) <= _dict.size())
+        {
+            results.push_back(_dict[id - 1]); 
+        }
+    }
+    return results;
 }
 
 Dictionary::Dictionary()

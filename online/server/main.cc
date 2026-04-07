@@ -1,8 +1,9 @@
 #include "SearchEngineServer.h"
 
-int main(int argc, char *argv[])
+int main()
 {
-    SearchEngineServer server(argv[1]);
+    SearchEngineServer server("helo");
+    server.start();
     return 0;
 }
 
