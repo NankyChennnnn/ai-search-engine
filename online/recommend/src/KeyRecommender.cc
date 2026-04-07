@@ -2,6 +2,12 @@
 #include "CandidateResult.h"
 #include "Dictionary.h"
 #include <algorithm>
+#include <cctype>
+#include "cppjieba/Unicode.hpp"
+
+using std::cout;
+using std::cerr;
+using std::endl;
 
 KeyRecommender::KeyRecommender(const string &word)
 : _sought(word)
@@ -17,13 +23,28 @@ vector<CandidateResult> KeyRecommender::doQuery()
 {
     vector<CandidateResult> crs;
     Dictionary &dict = Dictionary::getInstance();
-    vector<pair<string, int>> results = dict.doQuery(_sought);
+
+    // 分词，区分中英文
+    vector<string> tokens;
+    QueryType type = detectQueryType(_sought);
+    if (type == QueryType::INVALID)
+    {
+        cerr << "[ERROR] Invalid type." << endl;
+        return crs;
+    }
+
+    tokens = getTokens(_sought, type);
+    vector<pair<string, int>> results = dict.doQuery(tokens, type);
+
     for (auto rslt : results)
     {
+        vector<string> candTokens = getTokens(rslt.first, type);
+        
         CandidateResult cr;
         cr._word = rslt.first;
         cr._freq = rslt.second;
-        cr._dist = distance(_sought, rslt.first);
+        cr._dist = distance(tokens, candTokens);
+        
         crs.push_back(cr);
     }
     
@@ -43,7 +64,7 @@ vector<CandidateResult> KeyRecommender::doQuery()
     return topCrs;
 }
 
-int KeyRecommender::distance(const string &word, const string &cand)
+int KeyRecommender::distance(const vector<string> &word, const vector<string> &cand)
 {
     // Levenshtein 编辑距离：用于衡量两个字符串之间差异的度量标准
     // 包含三种操作：插入、删除、替换字符
@@ -132,3 +153,89 @@ int KeyRecommender::distance(const string &word, const string &cand)
     return mat[m][n];
 }
 
+QueryType KeyRecommender::detectQueryType(const string &query)
+{
+    if (query.empty()) return QueryType::INVALID;
+
+    // 纯英文查询词判定
+    bool allAsciiAlpha = true;
+    for (unsigned char c : query)
+    {
+        if (!(c < 128 && std::isalpha(c)))
+        {
+            allAsciiAlpha = false;
+            break;
+        }
+    }
+
+    if (allAsciiAlpha)
+    {
+        return QueryType::EN;
+    }
+
+    // 中英混合/纯中文查询词判定
+    cppjieba::RuneStrArray runes;
+    if (!cppjieba::DecodeRunesInString(query, runes) || runes.empty())
+    {
+        return QueryType::INVALID;
+    }
+
+    // cppjieba可拆分则判定为可用词
+    for (const auto &r : runes)
+    {
+        // 是否为常用汉字
+        if (r.rune >= 0x4E00 && r.rune <= 0x9FFF)
+        {
+            continue;
+        }
+
+        // 是否为ASCII码范围内
+        if (r.rune < 0x80 && std::isalnum(static_cast<unsigned char>(r.rune)))
+        {
+            continue;
+        }
+
+        // 均为否丢弃
+        return QueryType::INVALID;
+    }
+
+    return QueryType::ZH;
+}
+
+vector<string> KeyRecommender::decodeRunesInString(const string &query)
+{
+    vector<string> tokens;
+
+    cppjieba::RuneStrArray runes;
+    if (!cppjieba::DecodeRunesInString(query, runes))
+    {
+        return tokens;
+    }
+
+    tokens.reserve(runes.size());
+    for (const auto &r : runes)
+    {
+        tokens.push_back(query.substr(r.offset, r.len));
+    }
+
+    return tokens;
+}
+
+vector<string> KeyRecommender::getTokens(const string &query, QueryType type)
+{
+    vector<string> tokens;
+    if (type == QueryType::EN)
+    {
+        tokens.reserve(_sought.size());
+        for (unsigned char c : query)
+        {
+            tokens.push_back(string(1, static_cast<char>(std::tolower(c))));
+        }
+    }
+    else if (type == QueryType::ZH)
+    {
+        tokens = decodeRunesInString(query);
+    }
+
+    return tokens;
+}

@@ -2,6 +2,7 @@
 #define __DICTIONARY_H__
 
 #include "Configuration.h"
+#include <initializer_list>
 #include <vector>
 #include <utility>
 #include <string>
@@ -14,18 +15,31 @@ using std::string;
 using std::map;
 using std::set;
 
+enum class QueryType {
+    EN,
+    ZH,
+    INVALID
+};
+
+struct RecommendLib {
+    vector<pair<string, int>> _dict; // <word, freq>
+    map<string, set<int>> _index;
+};
+
 class Dictionary
 {
 public:
     static Dictionary &getInstance();
-    vector<pair<string, int>> doQuery(const string &key);
+    vector<pair<string, int>> doQuery(const vector<string> &tokens, QueryType type);
     int getTopk();
 
 private:
-    void createDict();
-    void createIndex();
-    set<int> getCandidateIds(const string &key);
-    vector<pair<string, int>> queryIndex(const set<int> &canids);
+    void createDict(std::initializer_list<string> names);
+    void createIndex(std::initializer_list<string> names);
+    set<int> getCandidateIds(const vector<string> &tokens, QueryType type);
+    vector<pair<string, int>> queryIndex(const set<int> &canids, QueryType type);
+    RecommendLib &getRecommendLib(const string &name);
+    RecommendLib &getRecommendLib(QueryType type);
 
 private:
     Dictionary();
@@ -35,8 +49,8 @@ private:
 
 private:
     Configuration &_conf;
-    vector<pair<string, int>> _dict;
-    map<string, set<int>> _index;
+    RecommendLib _engLib;
+    RecommendLib _zhLib;
 };
 
 #endif

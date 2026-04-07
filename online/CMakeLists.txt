@@ -11,6 +11,11 @@ endif()
 
 get_filename_component(REPO_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/.." ABSOLUTE)
 set(THIRD_PARTY_DIR "${REPO_ROOT}/third_party")
+set(CPPJIEBA_DIR "${THIRD_PARTY_DIR}/cppjieba")
+
+if(NOT EXISTS "${CPPJIEBA_DIR}/Jieba.hpp")
+    message(FATAL_ERROR "cppjieba not found: ${CPPJIEBA_DIR}")
+endif()
 
 set(COMMON_DIR "${CMAKE_CURRENT_SOURCE_DIR}/common/")
 set(RECOMMEND_DIR "${CMAKE_CURRENT_SOURCE_DIR}/recommend/")
@@ -40,7 +45,9 @@ target_include_directories(server PRIVATE
     "${THIRD_PARTY_DIR}")
 
 target_compile_definitions(server PRIVATE
-    ONLINE_CONF_PATH="${CMAKE_CURRENT_SOURCE_DIR}/conf/online.conf")
+    ONLINE_CONF_PATH="${CMAKE_CURRENT_SOURCE_DIR}/conf/online.conf"
+    JIEBA_CONF_PATH="${CMAKE_CURRENT_SOURCE_DIR}/conf/jieba.conf")
 
 message(STATUS "page source dir: ${CMAKE_CURRENT_SOURCE_DIR}")
 message(STATUS "repo root: ${REPO_ROOT}")
+message(STATUS "cppjieba dir: ${CPPJIEBA_DIR}")
