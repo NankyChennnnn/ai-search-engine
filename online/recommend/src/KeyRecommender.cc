@@ -35,7 +35,7 @@ vector<CandidateResult> KeyRecommender::doQuery()
               });
 
     vector<CandidateResult> topCrs;
-    int topk = dict.getTopk();
+    int topk = std::min(dict.getTopk(), static_cast<int>(crs.size()));
     for (int i = 0; i < topk; ++i)
     {
         topCrs.push_back(crs[i]);
