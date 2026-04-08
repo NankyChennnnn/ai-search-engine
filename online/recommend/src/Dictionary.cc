@@ -82,7 +82,7 @@ void Dictionary::createIndex(std::initializer_list<string> names)
         {
             size_t pos_begin = line.find_first_of("\"");
             size_t pos_end = line.find_last_of("\"");
-            string word = line.substr(pos_begin + 1, pos_end - 1);
+            string word = line.substr(pos_begin + 1, pos_end - pos_begin - 1);
 
             // remove ',', '{', '}'
             size_t pos = line.find_first_of("{");
@@ -101,7 +101,8 @@ void Dictionary::createIndex(std::initializer_list<string> names)
             pos_end = line.find_first_of(" ");
             while (pos_end != string::npos)
             {
-                lib._index[word].insert(std::stoi(line.substr(pos_begin, pos_end)));
+                lib._index[word].insert(std::stoi(line.substr(pos_begin, 
+                                                              pos_end - pos_begin)));
                 line = line.substr(pos_end + 1);
                 pos_begin = line.find_first_not_of(" ");
                 pos_end = line.find_first_of(" ");

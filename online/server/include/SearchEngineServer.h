@@ -3,7 +3,7 @@
 
 #include "KeyRecommender.h"
 #include <string>
-/* #include "WebPageSearcher.h" */
+#include "WebPageSearcher.h"
 
 using std::string;
 
@@ -24,7 +24,7 @@ private:
     /* Threadpool _threadPool; */
     /* TcpServer _tcpServer; */
     KeyRecommender _keyRecommender;
-    /* WebPageSearcher _webPageSearcher; */
+    WebPageSearcher _webPageSearcher;
     /* ProtocolParser _protocolParser; */
 };
 

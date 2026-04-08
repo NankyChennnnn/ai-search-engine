@@ -3,9 +3,8 @@
 #include "Dictionary.h"
 #include <algorithm>
 #include <cctype>
-#include "cppjieba/Unicode.hpp"
+#include "SplitTool.h"
 
-using std::cout;
 using std::cerr;
 using std::endl;
 
@@ -16,7 +15,6 @@ KeyRecommender::KeyRecommender(const string &word)
 
 KeyRecommender::~KeyRecommender()
 {
-
 }
 
 vector<CandidateResult> KeyRecommender::doQuery()
@@ -202,25 +200,6 @@ QueryType KeyRecommender::detectQueryType(const string &query)
     return QueryType::ZH;
 }
 
-vector<string> KeyRecommender::decodeRunesInString(const string &query)
-{
-    vector<string> tokens;
-
-    cppjieba::RuneStrArray runes;
-    if (!cppjieba::DecodeRunesInString(query, runes))
-    {
-        return tokens;
-    }
-
-    tokens.reserve(runes.size());
-    for (const auto &r : runes)
-    {
-        tokens.push_back(query.substr(r.offset, r.len));
-    }
-
-    return tokens;
-}
-
 vector<string> KeyRecommender::getTokens(const string &query, QueryType type)
 {
     vector<string> tokens;
@@ -234,7 +213,8 @@ vector<string> KeyRecommender::getTokens(const string &query, QueryType type)
     }
     else if (type == QueryType::ZH)
     {
-        tokens = decodeRunesInString(query);
+        SplitTool &tool = SplitTool::getInstance();
+        tokens = tool.decodeRunesInString(query);
     }
 
     return tokens;

@@ -18,7 +18,6 @@ public:
 private:
     int distance(const vector<string> &word, const vector<string> &cand);
     QueryType detectQueryType(const string &query);
-    vector<string> decodeRunesInString(const string &query);
     vector<string> getTokens(const string &query, QueryType type);
 
 private:

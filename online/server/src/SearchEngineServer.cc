@@ -5,6 +5,7 @@ using std::endl;
 
 SearchEngineServer::SearchEngineServer(const string &word)
 : _keyRecommender(word)
+, _webPageSearcher(word)
 {
 }
 
@@ -22,6 +23,9 @@ void SearchEngineServer::start()
         cout << " [" << cand._word << "]";
     }
     cout << "." << endl;
+
+    cout << "[WARNING] Test WebPageSearcher" << endl
+         << _webPageSearcher.doQuery() << endl;
 }
 
 void SearchEngineServer::stop()
