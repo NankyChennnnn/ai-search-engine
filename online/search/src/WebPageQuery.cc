@@ -1,12 +1,13 @@
 #include "WebPageQuery.h"
+#include "WebPage.h"
 #include <cstdio>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 
 // @TODO
-// 1. 读取 pagelib.dat -> _pages
-// 2. 读取 offsetlib.dat -> _offsetlib
-// 3. 读取 indexlib.dat -> _invertIndexLib
+// 1. 完成doQuery内容
+// 2. 明确pagelib如何读取索引
 
 using std::cout;
 using std::cerr;
@@ -15,10 +16,10 @@ using std::ifstream;
 
 WebPageQuery::WebPageQuery()
 : _conf(Configuration::getInstance())
+, _pageLib(_conf.getConfig("pagelib"))
 {
     loadOffsetLib();
     loadIndexLib();
-    /* readDoc(docid); */
 }
 
 WebPageQuery &WebPageQuery::getInstance()
@@ -27,9 +28,56 @@ WebPageQuery &WebPageQuery::getInstance()
     return instance;
 }
 
-string WebPageQuery::doQuery(const vector<string> &tokens)
+vector<WebPage> WebPageQuery::doQuery(const vector<string> &tokens)
 {
-    return "";
+    cout << "[WARNING] Querying \"";
+    // 表示docid对应文章的权值总和
+    // 如 'h' 和 'o' 都提到了docid = 4的文章
+    // 则权值汇总相加，最后比较权值，最大的候选
+    unordered_map<int, double> docScores;
+    
+    // 上层完成拆词（中文/英文/中英混合）
+    for (const auto &token : tokens)
+    {
+        // 找到单元词或字母对应倒排索引
+        auto index = _invertIndexLib.find(token);
+        if (index == _invertIndexLib.end()) continue;
+
+        cout << index->first;
+        
+        // 权值加和
+        for (const auto &it : index->second)
+        {
+            int docid = it.first;
+            double weight = it.second;
+            docScores[docid] += weight;
+        }
+
+    }
+    cout << "\"..." << endl;
+    
+    // 按照加和权值排序
+    vector<pair<int, double>> rankedDocs(docScores.begin(), docScores.end());
+    std::sort(rankedDocs.begin(), rankedDocs.end(), 
+              [](const auto &lhs, const auto &rhs) {
+                  return lhs.second > rhs.second;
+              });
+    
+    // 获取前topk个候选文章
+    vector<WebPage> pages;
+    int topk = std::min({getTopk(), static_cast<int>(rankedDocs.size())});
+    for (int i = 0; i < topk; ++i)
+    {
+        int docid = rankedDocs[i].first;
+        double weight = rankedDocs[i].second;
+        
+        // 找出对应文章并插入容器
+        pages.push_back(loadPage(docid));
+    }
+
+    cout << "[INFO] Query done." << endl;
+
+    return pages;
 }
 
 void WebPageQuery::loadOffsetLib()
@@ -107,8 +155,47 @@ void WebPageQuery::loadIndexLib()
     ifs.close();
 }
 
-void WebPageQuery::readDoc(int docid)
+int WebPageQuery::getTopk()
 {
-    string path = _conf.getConfig("pagelib");
-    string name = "pagelib.dat";
+    return std::stoi(_conf.getConfig("search_topk"));
 }
+
+WebPage WebPageQuery::loadPage(int docid)
+{
+    string doc = findDoc(docid);    // 1. 栈对象
+    WebPage page(doc);              // 2. WebPage(const string &) 
+                                    //    doc以引用绑定（即 const string &）
+                                    //    的方式传入构造
+    return page;
+}
+
+string WebPageQuery::findDoc(int docid)
+{
+    // 根据 docid 去 _offsetLib 找到 (offset, size)
+    auto it = _offsetLib.find(docid);
+    if (it == _offsetLib.end())
+    {
+        return "";
+    }
+
+    int offset = it->second.first;
+    int size = it->second.second;
+    
+    // 在 pagelib.dat 里 seekg(offset)
+    // 读出一段原始 <doc>...</doc> 字符串
+    ifstream ifs(_pageLib);
+    if (!ifs.is_open())
+    {
+        return "";
+    }
+
+    ifs.seekg(offset);
+
+    // 初始化size个'\0'到doc
+    string doc(size, '\0');
+    // 读取size个字符到doc
+    ifs.read(&doc[0], size);
+
+    return doc;
+}
+

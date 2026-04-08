@@ -18,10 +18,19 @@ struct Page
 class WebPage
 {
 public:
-    WebPage();
+    WebPage(const string &doc);
     ~WebPage();
+    int getDocid();
+    string getTitle();
+    string getLink();
+    string getDescription();
+    string getContent();
 
 private:
+    string getTagContent(const string &tag);
+
+private:
+    string _doc;
     Page _page;
 };
 

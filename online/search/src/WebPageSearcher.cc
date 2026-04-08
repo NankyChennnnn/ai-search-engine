@@ -1,4 +1,5 @@
 #include "WebPageSearcher.h"
+#include "WebPage.h"
 #include "WebPageQuery.h"
 #include <iostream>
 
@@ -21,5 +22,10 @@ string WebPageSearcher::doQuery()
 {
     WebPageQuery &query = WebPageQuery::getInstance();    
     vector<string> tokens = _tool.cutAndFilter(_sought);
-    return query.doQuery(tokens);
+    vector<WebPage> pages = query.doQuery(tokens);
+    for (auto &page : pages)
+    {
+        cout << "  ---> " << page.getTitle() << endl;
+    }
+    return "[WARNING] WebPageSearcher Test done.";
 }

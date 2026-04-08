@@ -19,8 +19,7 @@ class WebPageQuery
 {
 public:
     static WebPageQuery &getInstance();
-    string doQuery(const vector<string> &tokens);
-    int getTopk();
+    vector<WebPage> doQuery(const vector<string> &tokens);
 
 private:
     WebPageQuery();
@@ -31,10 +30,13 @@ private:
 private:
     void loadOffsetLib();
     void loadIndexLib();
-    void readDoc(int docid);
+    int getTopk();
+    WebPage loadPage(int docid);
+    string findDoc(int docid);
 
 private:
     Configuration &_conf;
+    const string &_pageLib;
     vector<WebPage> _pages;
     unordered_map<int, pair<int, int>> _offsetLib;
     unordered_map<string, vector<pair<int, double>>> _invertIndexLib;
