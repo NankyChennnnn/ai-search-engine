@@ -17,6 +17,9 @@ public:
     string doQuery();
 
 private:
+    string truncateUTF8(const string &text, size_t count);
+
+private:
     string _sought;
     SplitTool &_tool;
     /* TcpConnectionPtr _conn; */

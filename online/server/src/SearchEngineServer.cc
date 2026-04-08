@@ -16,13 +16,13 @@ SearchEngineServer::~SearchEngineServer()
 
 void SearchEngineServer::start()
 {
-    vector<CandidateResult> results = _keyRecommender.doQuery();
-    cout << "[INFO] Find candidate word";
-    for (auto &cand : results)
-    {
-        cout << " [" << cand._word << "]";
-    }
-    cout << "." << endl;
+    /* vector<CandidateResult> results = _keyRecommender.doQuery(); */
+    /* cout << "[INFO] Find candidate word"; */
+    /* for (auto &cand : results) */
+    /* { */
+    /*     cout << " [" << cand._word << "]"; */
+    /* } */
+    /* cout << "." << endl; */
 
     cout << "[WARNING] Test WebPageSearcher" << endl
          << _webPageSearcher.doQuery() << endl;
