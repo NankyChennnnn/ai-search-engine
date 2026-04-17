@@ -4,9 +4,13 @@ using std::cout;
 using std::endl;
 
 SearchEngineServer::SearchEngineServer(const string &word)
-: _keyRecommender(word)
+: _threadPool(4, 10)
+, _keyRecommender(word)
 , _webPageSearcher(word)
 {
+    Request r = _protocolParser.doParse(word);
+    cout << "[WARNING] Protocol Parser --> " 
+        << r.type << ", " << r.query << std::endl;
 }
 
 SearchEngineServer::~SearchEngineServer()
@@ -16,6 +20,7 @@ SearchEngineServer::~SearchEngineServer()
 
 void SearchEngineServer::start()
 {
+    _threadPool.start();
     /* vector<CandidateResult> results = _keyRecommender.doQuery(); */
     /* cout << "[INFO] Find candidate word"; */
     /* for (auto &cand : results) */
@@ -40,7 +45,10 @@ void SearchEngineServer::onConnection()
 
 void SearchEngineServer::onMessage()
 {
-
+    // 收到一条请求消息
+    // 解析协议
+    // 拿到 type 和 query
+    // 请求一个任务
 }
 
 void SearchEngineServer::onClose()

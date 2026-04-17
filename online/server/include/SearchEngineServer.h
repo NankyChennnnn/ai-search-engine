@@ -1,9 +1,11 @@
 #ifndef __SEARCHENGINESERVER_H__
 #define __SEARCHENGINESERVER_H__
 
+#include "ThreadPool.h"
 #include "KeyRecommender.h"
-#include <string>
 #include "WebPageSearcher.h"
+#include "ProtocolParser.h"
+#include <string>
 
 using std::string;
 
@@ -18,14 +20,15 @@ public:
     void onConnection();
     void onMessage();
     void onClose();
+    // 在线程池任务里临时创建task对象
     /* void doTaskThread(const TcpConnectionPtr &ptr, string &msg); */
 
 private:
-    /* Threadpool _threadPool; */
+    ThreadPool _threadPool;
     /* TcpServer _tcpServer; */
     KeyRecommender _keyRecommender;
     WebPageSearcher _webPageSearcher;
-    /* ProtocolParser _protocolParser; */
+    ProtocolParser _protocolParser;
 };
 
 #endif
